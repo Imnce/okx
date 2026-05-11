@@ -22,30 +22,12 @@
       </header>
 
       <section class="status-grid">
-        <article>
-          <span>状态</span>
-          <strong id="state">-</strong>
-        </article>
-        <article>
-          <span>环境</span>
-          <strong id="env">-</strong>
-        </article>
-        <article>
-          <span>交易对</span>
-          <strong id="symbol">-</strong>
-        </article>
-        <article>
-          <span>最新价</span>
-          <strong id="price">-</strong>
-        </article>
-        <article>
-          <span>今日 PnL</span>
-          <strong id="pnl">-</strong>
-        </article>
-        <article>
-          <span>风控</span>
-          <strong id="risk">-</strong>
-        </article>
+        <article><span>状态</span><strong id="state">-</strong></article>
+        <article><span>环境</span><strong id="env">-</strong></article>
+        <article><span>交易对</span><strong id="symbol">-</strong></article>
+        <article><span>最新价</span><strong id="price">-</strong></article>
+        <article><span>今日 PnL</span><strong id="pnl">-</strong></article>
+        <article><span>风控</span><strong id="risk">-</strong></article>
       </section>
 
       <section class="layout">
@@ -54,10 +36,20 @@
             <h2>策略参数</h2>
             <button type="submit">保存</button>
           </div>
-          <label>交易对 <input name="symbol" value="BTC-USDT-SWAP" /></label>
-          <label>K线周期 <input name="bar" value="1m" /></label>
+          <label>交易对 <input name="symbol" value="XAU-USDT-SWAP" /></label>
+          <label>K线周期 <input name="bar" value="1H" /></label>
+          <label>策略类型
+            <select name="strategy_kind">
+              <option value="trend">趋势跟随</option>
+              <option value="breakout">区间突破</option>
+              <option value="mean_reversion">均值回归</option>
+            </select>
+          </label>
           <label>短均线 <input name="short_window" type="number" min="2" value="9" /></label>
           <label>长均线 <input name="long_window" type="number" min="3" value="21" /></label>
+          <label>突破窗口 <input name="breakout_window" type="number" min="5" value="24" /></label>
+          <label>均值窗口 <input name="mean_window" type="number" min="5" value="30" /></label>
+          <label>偏离阈值 % <input name="mean_reversion_threshold_pct" type="number" step="0.1" value="0.8" /></label>
           <label>单笔风险 % <input name="risk_per_trade_pct" type="number" step="0.1" value="0.5" /></label>
           <label>止盈 % <input name="take_profit_pct" type="number" step="0.1" value="1.2" /></label>
           <label>止损 % <input name="stop_loss_pct" type="number" step="0.1" value="0.6" /></label>
@@ -85,8 +77,19 @@
           </div>
         </section>
       </section>
+
+      <section class="panel backtest-panel">
+        <div class="section-head">
+          <div>
+            <h2>XAU-USDT 回测候选策略</h2>
+            <span>固定候选集 + 训练/样本外拆分，避免暴力调参过拟合</span>
+          </div>
+          <button id="backtestBtn" class="primary" type="button">运行 XAU 回测</button>
+        </div>
+        <div id="backtestSummary" class="summary">尚未运行</div>
+        <div id="backtestResults" class="candidate-grid"></div>
+      </section>
     </main>
     <script src="/static/app.js"></script>
   </body>
 </html>
-

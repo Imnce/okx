@@ -23,11 +23,21 @@ class SignalAction(str, Enum):
     HOLD = "hold"
 
 
+class StrategyKind(str, Enum):
+    TREND = "trend"
+    BREAKOUT = "breakout"
+    MEAN_REVERSION = "mean_reversion"
+
+
 class StrategyConfig(BaseModel):
     symbol: str = "BTC-USDT-SWAP"
     bar: str = "1m"
+    strategy_kind: StrategyKind = StrategyKind.TREND
     short_window: int = Field(default=9, ge=2, le=200)
     long_window: int = Field(default=21, ge=3, le=500)
+    breakout_window: int = Field(default=24, ge=5, le=240)
+    mean_window: int = Field(default=30, ge=5, le=240)
+    mean_reversion_threshold_pct: float = Field(default=0.8, gt=0, le=10)
     risk_per_trade_pct: float = Field(default=0.5, gt=0, le=5)
     take_profit_pct: float = Field(default=1.2, gt=0, le=20)
     stop_loss_pct: float = Field(default=0.6, gt=0, le=10)
@@ -109,4 +119,3 @@ class RuntimeStatus(BaseModel):
     last_signal: TradeSignal | None = None
     risk_status: str = "ready"
     connection_status: str = "idle"
-

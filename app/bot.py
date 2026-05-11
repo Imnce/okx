@@ -5,7 +5,7 @@ from app.models import BotState, Candle, OrderRequest, Position, RuntimeStatus, 
 from app.okx_client import OkxApiError, OkxClient
 from app.risk import RiskManager
 from app.storage import AuditStore
-from app.strategy import TrendFollowingStrategy
+from app.strategy import build_strategy
 
 
 class TradingBot:
@@ -16,7 +16,7 @@ class TradingBot:
         self.env = env
         self.has_credentials = has_credentials
         self.risk = RiskManager(config)
-        self.strategy = TrendFollowingStrategy(config)
+        self.strategy = build_strategy(config)
         self.state = BotState.STOPPED
         self.latest_price: float | None = None
         self.positions: list[Position] = []
@@ -51,7 +51,7 @@ class TradingBot:
             raise ValueError("pause the bot before changing strategy config")
         self.config = config
         self.risk.set_config(config)
-        self.strategy = TrendFollowingStrategy(config)
+        self.strategy = build_strategy(config)
         await self.store.save_config(config)
 
     async def close_positions(self) -> None:
@@ -120,5 +120,5 @@ class TradingBot:
                 now = datetime.now(timezone.utc)
                 price = self.latest_price or 100.0
                 self._candles.append(Candle(ts=now, open=price, high=price, low=price, close=price))
-            await self.run_once_with_candles(self._candles[-self.config.long_window :])
-
+            window = max(self.config.long_window, self.config.breakout_window + 1, self.config.mean_window)
+            await self.run_once_with_candles(self._candles[-window:])

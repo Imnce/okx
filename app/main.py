@@ -5,8 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from app.backtest import BacktestReport, evaluate_candidates
 from app.bot import TradingBot
 from app.config import get_settings
+from app.market_data import fetch_okx_history_candles
 from app.models import StrategyConfig
 from app.okx_client import OkxClient
 from app.storage import AuditStore
@@ -102,3 +104,10 @@ async def close_positions():
     await bot.close_positions()
     return bot.status()
 
+
+@app.get("/api/backtest/xau", response_model=BacktestReport)
+async def backtest_xau(bar: str = "1H", limit: int = 300):
+    candles = await fetch_okx_history_candles("XAU-USDT-SWAP", bar=bar, limit=limit)
+    if len(candles) < 120:
+        raise HTTPException(status_code=422, detail="Not enough candles for conservative train/test backtest")
+    return evaluate_candidates("XAU-USDT-SWAP", bar, candles)

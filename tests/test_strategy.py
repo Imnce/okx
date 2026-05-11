@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from app.models import Candle, SignalAction, StrategyConfig
-from app.strategy import TrendFollowingStrategy
+from app.strategy import BreakoutStrategy, MeanReversionStrategy, TrendFollowingStrategy
 
 
 def candles(values):
@@ -29,3 +29,16 @@ def test_strategy_holds_until_enough_candles():
     signal = TrendFollowingStrategy(config).generate_signal(candles([1, 2, 3]))
     assert signal.action == SignalAction.HOLD
 
+
+def test_breakout_strategy_opens_long_on_new_high():
+    config = StrategyConfig(breakout_window=5, take_profit_pct=2, stop_loss_pct=1)
+    signal = BreakoutStrategy(config).generate_signal(candles([10, 11, 12, 13, 14, 15]))
+    assert signal.action == SignalAction.OPEN_LONG
+    assert signal.take_profit == 15.3
+    assert signal.stop_loss == 14.85
+
+
+def test_mean_reversion_opens_short_when_far_above_mean():
+    config = StrategyConfig(mean_window=5, mean_reversion_threshold_pct=5, take_profit_pct=1, stop_loss_pct=1)
+    signal = MeanReversionStrategy(config).generate_signal(candles([100, 100, 100, 100, 130]))
+    assert signal.action == SignalAction.OPEN_SHORT

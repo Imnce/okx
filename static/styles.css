@@ -22,7 +22,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -157,12 +158,14 @@ label {
   font-size: 0.85rem;
 }
 
-input {
+input,
+select {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 0.55rem 0.65rem;
   color: var(--text);
+  background: var(--surface);
 }
 
 .detail {
@@ -188,6 +191,59 @@ pre {
   overflow-wrap: anywhere;
 }
 
+h4 {
+  margin: 10px 0 6px;
+  font-size: 0.84rem;
+}
+
+.backtest-panel {
+  margin-top: 14px;
+}
+
+.summary {
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.candidate-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.candidate {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.candidate h3 {
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.metrics span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.metrics strong {
+  font-size: 0.95rem;
+}
+
+.note {
+  color: var(--muted);
+  font-size: 0.86rem;
+  min-height: 34px;
+}
+
 @media (max-width: 880px) {
   .topbar,
   .layout {
@@ -199,8 +255,11 @@ pre {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .candidate-grid {
+    grid-template-columns: 1fr;
+  }
+
   .actions {
     justify-content: flex-start;
   }
 }
-
