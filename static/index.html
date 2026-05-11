@@ -14,12 +14,18 @@
           <h1>永续合约量化控制台</h1>
         </div>
         <div class="actions">
-          <button id="startBtn" class="primary">启动</button>
-          <button id="pauseBtn">暂停</button>
-          <button id="closeBtn">平仓</button>
-          <button id="stopBtn" class="danger">急停</button>
+          <button id="presetBtn" class="primary" type="button">一键短线策略</button>
+          <button id="startBtn" class="primary" type="button">启动</button>
+          <button id="pauseBtn" type="button">暂停</button>
+          <button id="closeBtn" type="button">平仓</button>
+          <button id="stopBtn" class="danger" type="button">急停</button>
         </div>
       </header>
+
+      <section class="preset-strip">
+        <strong>XAU 自动短线</strong>
+        <span>15m 突破 + 趋势过滤，固定止盈止损和保守风控。你只需要点“一键短线策略”，再按“启动”。</span>
+      </section>
 
       <section class="status-grid">
         <article><span>状态</span><strong id="state">-</strong></article>
@@ -31,32 +37,47 @@
       </section>
 
       <section class="layout">
-        <form id="configForm" class="panel">
+        <section class="panel">
           <div class="section-head">
-            <h2>策略参数</h2>
-            <button type="submit">保存</button>
+            <h2>当前策略</h2>
+            <button id="toggleAdvanced" type="button">查看参数</button>
           </div>
-          <label>交易对 <input name="symbol" value="XAU-USDT-SWAP" /></label>
-          <label>K线周期 <input name="bar" value="1H" /></label>
-          <label>策略类型
-            <select name="strategy_kind">
-              <option value="trend">趋势跟随</option>
-              <option value="breakout">区间突破</option>
-              <option value="mean_reversion">均值回归</option>
-            </select>
-          </label>
-          <label>短均线 <input name="short_window" type="number" min="2" value="9" /></label>
-          <label>长均线 <input name="long_window" type="number" min="3" value="21" /></label>
-          <label>突破窗口 <input name="breakout_window" type="number" min="5" value="24" /></label>
-          <label>均值窗口 <input name="mean_window" type="number" min="5" value="30" /></label>
-          <label>偏离阈值 % <input name="mean_reversion_threshold_pct" type="number" step="0.1" value="0.8" /></label>
-          <label>单笔风险 % <input name="risk_per_trade_pct" type="number" step="0.1" value="0.5" /></label>
-          <label>止盈 % <input name="take_profit_pct" type="number" step="0.1" value="1.2" /></label>
-          <label>止损 % <input name="stop_loss_pct" type="number" step="0.1" value="0.6" /></label>
-          <label>杠杆 <input name="leverage" type="number" min="1" max="5" value="3" /></label>
-          <label>合约张数 <input name="order_size_contracts" type="number" step="0.1" value="1" /></label>
-          <label>最大持仓数 <input name="max_positions" type="number" min="1" max="5" value="1" /></label>
-        </form>
+          <div class="strategy-summary">
+            <div><span>策略</span><strong id="strategyKind">-</strong></div>
+            <div><span>周期</span><strong id="barValue">-</strong></div>
+            <div><span>止盈</span><strong id="tpValue">-</strong></div>
+            <div><span>止损</span><strong id="slValue">-</strong></div>
+            <div><span>杠杆</span><strong id="levValue">-</strong></div>
+            <div><span>日亏损熔断</span><strong id="dailyLossValue">-</strong></div>
+          </div>
+
+          <form id="configForm" class="advanced hidden">
+            <label>交易对 <input name="symbol" value="XAU-USDT-SWAP" /></label>
+            <label>K线周期 <input name="bar" value="15m" /></label>
+            <label>策略类型
+              <select name="strategy_kind">
+                <option value="xau_short_scalp">XAU 自动短线</option>
+                <option value="trend">趋势跟随</option>
+                <option value="breakout">区间突破</option>
+                <option value="mean_reversion">均值回归</option>
+              </select>
+            </label>
+            <label>短均线 <input name="short_window" type="number" min="2" value="9" /></label>
+            <label>长均线 <input name="long_window" type="number" min="3" value="30" /></label>
+            <label>突破窗口 <input name="breakout_window" type="number" min="5" value="12" /></label>
+            <label>均值窗口 <input name="mean_window" type="number" min="5" value="30" /></label>
+            <label>偏离阈值 % <input name="mean_reversion_threshold_pct" type="number" step="0.1" value="0.8" /></label>
+            <label>单笔风险 % <input name="risk_per_trade_pct" type="number" step="0.1" value="0.3" /></label>
+            <label>止盈 % <input name="take_profit_pct" type="number" step="0.1" value="0.35" /></label>
+            <label>止损 % <input name="stop_loss_pct" type="number" step="0.1" value="0.25" /></label>
+            <label>杠杆 <input name="leverage" type="number" min="1" max="5" value="2" /></label>
+            <label>合约张数 <input name="order_size_contracts" type="number" step="0.1" value="1" /></label>
+            <label>最大持仓数 <input name="max_positions" type="number" min="1" max="5" value="1" /></label>
+            <label>日亏损上限 % <input name="daily_loss_limit_pct" type="number" step="0.1" value="1.5" /></label>
+            <label>连续亏损上限 <input name="max_consecutive_losses" type="number" min="1" max="20" value="2" /></label>
+            <button type="submit">保存参数</button>
+          </form>
+        </section>
 
         <section class="panel">
           <div class="section-head">
@@ -82,7 +103,7 @@
         <div class="section-head">
           <div>
             <h2>XAU-USDT 回测候选策略</h2>
-            <span>固定候选集 + 训练/样本外拆分，避免暴力调参过拟合</span>
+            <span>固定候选集 + 训练/样本外拆分，不做暴力调参</span>
           </div>
           <button id="backtestBtn" class="primary" type="button">运行 XAU 回测</button>
         </div>

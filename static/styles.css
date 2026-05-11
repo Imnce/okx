@@ -51,6 +51,10 @@ button.danger {
   color: var(--danger);
 }
 
+.hidden {
+  display: none;
+}
+
 .shell {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
@@ -90,6 +94,21 @@ h1 {
   flex-wrap: wrap;
   gap: 8px;
   justify-content: flex-end;
+}
+
+.preset-strip {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: #eaf6ef;
+  border: 1px solid #b9ddc8;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+
+.preset-strip span {
+  color: var(--muted);
 }
 
 .status-grid {
@@ -132,6 +151,33 @@ h1 {
 
 .panel {
   padding: 16px;
+}
+
+.strategy-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.strategy-summary div {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.strategy-summary span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin-bottom: 6px;
+}
+
+.strategy-summary strong {
+  font-size: 1rem;
+}
+
+.advanced {
+  margin-top: 14px;
 }
 
 .section-head {
@@ -261,5 +307,14 @@ h4 {
 
   .actions {
     justify-content: flex-start;
+  }
+
+  .preset-strip {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .strategy-summary {
+    grid-template-columns: 1fr;
   }
 }

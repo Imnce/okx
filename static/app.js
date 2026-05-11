@@ -12,6 +12,16 @@ async function api(path, options = {}) {
   return response.json();
 }
 
+function strategyLabel(kind) {
+  const labels = {
+    xau_short_scalp: "XAU 自动短线",
+    trend: "趋势跟随",
+    breakout: "区间突破",
+    mean_reversion: "均值回归",
+  };
+  return labels[kind] || kind;
+}
+
 function renderStatus(status) {
   $("state").textContent = status.state;
   $("env").textContent = status.env + (status.has_credentials ? "" : " / no key");
@@ -25,8 +35,18 @@ function renderStatus(status) {
   $("orders").textContent = JSON.stringify(status.open_orders, null, 2);
 }
 
+function renderConfigSummary(config) {
+  $("strategyKind").textContent = strategyLabel(config.strategy_kind);
+  $("barValue").textContent = config.bar;
+  $("tpValue").textContent = `${config.take_profit_pct}%`;
+  $("slValue").textContent = `${config.stop_loss_pct}%`;
+  $("levValue").textContent = `${config.leverage}x`;
+  $("dailyLossValue").textContent = `${config.daily_loss_limit_pct}%`;
+}
+
 async function refresh() {
   renderStatus(await api("/api/status"));
+  renderConfigSummary(await api("/api/config"));
 }
 
 function formConfig() {
@@ -43,23 +63,33 @@ function formConfig() {
     "leverage",
     "order_size_contracts",
     "max_positions",
+    "daily_loss_limit_pct",
+    "max_consecutive_losses",
   ];
   const config = Object.fromEntries(data.entries());
   for (const key of numeric) {
     config[key] = Number(config[key]);
   }
-  config.daily_loss_limit_pct = 3;
-  config.max_consecutive_losses = 3;
   return config;
 }
 
-async function loadConfig() {
-  const config = await api("/api/config");
+function fillForm(config) {
   for (const [key, value] of Object.entries(config)) {
     const input = document.querySelector(`[name="${key}"]`);
     if (input) input.value = value;
   }
+  renderConfigSummary(config);
 }
+
+async function loadConfig() {
+  fillForm(await api("/api/config"));
+}
+
+$("presetBtn").addEventListener("click", async () => {
+  const config = await api("/api/presets/xau-short-scalp", { method: "POST" });
+  fillForm(config);
+  await refresh();
+});
 
 $("startBtn").addEventListener("click", async () => {
   renderStatus(await api("/api/start", { method: "POST" }));
@@ -77,9 +107,14 @@ $("closeBtn").addEventListener("click", async () => {
   renderStatus(await api("/api/close-positions", { method: "POST" }));
 });
 
+$("toggleAdvanced").addEventListener("click", () => {
+  $("configForm").classList.toggle("hidden");
+});
+
 $("configForm").addEventListener("submit", async (event) => {
   event.preventDefault();
-  await api("/api/config", { method: "PUT", body: JSON.stringify(formConfig()) });
+  const config = await api("/api/config", { method: "PUT", body: JSON.stringify(formConfig()) });
+  fillForm(config);
   await refresh();
 });
 
@@ -119,17 +154,14 @@ function renderBacktest(report) {
 
 $("backtestBtn").addEventListener("click", async () => {
   $("backtestSummary").textContent = "正在获取 OKX XAU-USDT-SWAP 历史K线并回测...";
-  const report = await api("/api/backtest/xau?bar=1H&limit=300");
+  const report = await api("/api/backtest/xau?bar=15m&limit=300");
   renderBacktest(report);
 });
 
 $("backtestResults").addEventListener("click", async (event) => {
   if (!event.target.classList.contains("useCandidate")) return;
   const config = JSON.parse(event.target.dataset.config);
-  for (const [key, value] of Object.entries(config)) {
-    const input = document.querySelector(`[name="${key}"]`);
-    if (input) input.value = value;
-  }
+  fillForm(config);
   await api("/api/config", { method: "PUT", body: JSON.stringify(formConfig()) });
   await refresh();
 });

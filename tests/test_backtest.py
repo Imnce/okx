@@ -24,5 +24,5 @@ def test_evaluate_candidates_uses_train_and_test_segments():
     values = [100 + index * 0.1 for index in range(180)]
     report = evaluate_candidates("XAU-USDT-SWAP", "1H", candles(values))
     assert report.symbol == "XAU-USDT-SWAP"
-    assert len(report.candidates) == 4
+    assert len(report.candidates) == 5
     assert all(candidate.train.trades >= 0 and candidate.test.trades >= 0 for candidate in report.candidates)

@@ -126,7 +126,53 @@ class MeanReversionStrategy:
         return TradeSignal(action=SignalAction.HOLD, symbol=self.config.symbol, price=price, reason="near_mean")
 
 
+class XauShortScalpStrategy:
+    def __init__(self, config: StrategyConfig):
+        self.config = config
+
+    def generate_signal(self, candles: list[Candle]) -> TradeSignal:
+        trend_window = 30
+        breakout_window = 12
+        needed = trend_window + 1
+        if len(candles) < needed:
+            return TradeSignal(
+                action=SignalAction.HOLD,
+                symbol=self.config.symbol,
+                price=candles[-1].close if candles else 0,
+                reason="waiting_for_short_scalp_window",
+            )
+
+        price = candles[-1].close
+        closes = [c.close for c in candles]
+        trend_ma = simple_moving_average(closes, trend_window)
+        previous = candles[-breakout_window - 1 : -1]
+        prior_high = max(c.high for c in previous)
+        prior_low = min(c.low for c in previous)
+
+        if price > prior_high and price > trend_ma:
+            return TradeSignal(
+                action=SignalAction.OPEN_LONG,
+                symbol=self.config.symbol,
+                price=price,
+                reason=f"xau_short_scalp long: breakout {prior_high:.2f}, trend_ma {trend_ma:.2f}",
+                take_profit=round(price * (1 + self.config.take_profit_pct / 100), 6),
+                stop_loss=round(price * (1 - self.config.stop_loss_pct / 100), 6),
+            )
+        if price < prior_low and price < trend_ma:
+            return TradeSignal(
+                action=SignalAction.OPEN_SHORT,
+                symbol=self.config.symbol,
+                price=price,
+                reason=f"xau_short_scalp short: breakdown {prior_low:.2f}, trend_ma {trend_ma:.2f}",
+                take_profit=round(price * (1 - self.config.take_profit_pct / 100), 6),
+                stop_loss=round(price * (1 + self.config.stop_loss_pct / 100), 6),
+            )
+        return TradeSignal(action=SignalAction.HOLD, symbol=self.config.symbol, price=price, reason="no_short_scalp_trigger")
+
+
 def build_strategy(config: StrategyConfig):
+    if config.strategy_kind == StrategyKind.XAU_SHORT_SCALP:
+        return XauShortScalpStrategy(config)
     if config.strategy_kind == StrategyKind.BREAKOUT:
         return BreakoutStrategy(config)
     if config.strategy_kind == StrategyKind.MEAN_REVERSION:

@@ -27,6 +27,7 @@ class StrategyKind(str, Enum):
     TREND = "trend"
     BREAKOUT = "breakout"
     MEAN_REVERSION = "mean_reversion"
+    XAU_SHORT_SCALP = "xau_short_scalp"
 
 
 class StrategyConfig(BaseModel):

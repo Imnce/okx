@@ -11,6 +11,7 @@ from app.config import get_settings
 from app.market_data import fetch_okx_history_candles
 from app.models import StrategyConfig
 from app.okx_client import OkxClient
+from app.presets import xau_short_scalp_preset
 from app.storage import AuditStore
 
 
@@ -111,3 +112,13 @@ async def backtest_xau(bar: str = "1H", limit: int = 300):
     if len(candles) < 120:
         raise HTTPException(status_code=422, detail="Not enough candles for conservative train/test backtest")
     return evaluate_candidates("XAU-USDT-SWAP", bar, candles)
+
+
+@app.post("/api/presets/xau-short-scalp")
+async def apply_xau_short_scalp_preset():
+    config = xau_short_scalp_preset()
+    try:
+        await bot.update_config(config)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return config

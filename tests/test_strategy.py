@@ -1,7 +1,8 @@
 from datetime import datetime, timezone
 
 from app.models import Candle, SignalAction, StrategyConfig
-from app.strategy import BreakoutStrategy, MeanReversionStrategy, TrendFollowingStrategy
+from app.presets import xau_short_scalp_preset
+from app.strategy import BreakoutStrategy, MeanReversionStrategy, TrendFollowingStrategy, XauShortScalpStrategy
 
 
 def candles(values):
@@ -42,3 +43,12 @@ def test_mean_reversion_opens_short_when_far_above_mean():
     config = StrategyConfig(mean_window=5, mean_reversion_threshold_pct=5, take_profit_pct=1, stop_loss_pct=1)
     signal = MeanReversionStrategy(config).generate_signal(candles([100, 100, 100, 100, 130]))
     assert signal.action == SignalAction.OPEN_SHORT
+
+
+def test_xau_short_scalp_preset_opens_long_on_filtered_breakout():
+    config = xau_short_scalp_preset()
+    values = [100 + index * 0.1 for index in range(30)] + [104]
+    signal = XauShortScalpStrategy(config).generate_signal(candles(values))
+    assert signal.action == SignalAction.OPEN_LONG
+    assert signal.take_profit == 104.364
+    assert signal.stop_loss == 103.74

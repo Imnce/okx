@@ -33,3 +33,13 @@ def test_config_validation_rejects_bad_windows():
         )
         assert response.status_code == 422
 
+
+def test_xau_short_scalp_preset_endpoint_applies_config():
+    with TestClient(app) as client:
+        response = client.post("/api/presets/xau-short-scalp")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["symbol"] == "XAU-USDT-SWAP"
+        assert data["bar"] == "15m"
+        assert data["strategy_kind"] == "xau_short_scalp"
+        assert data["take_profit_pct"] == 0.35

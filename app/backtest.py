@@ -4,6 +4,7 @@ from math import sqrt
 from pydantic import BaseModel
 
 from app.models import Candle, SignalAction, StrategyConfig, StrategyKind
+from app.presets import xau_short_scalp_preset
 from app.strategy import build_strategy
 
 
@@ -40,6 +41,7 @@ class Trade:
 def candidate_configs(symbol: str, bar: str) -> list[tuple[str, StrategyConfig]]:
     base = dict(symbol=symbol, bar=bar, leverage=2, risk_per_trade_pct=0.5, order_size_contracts=1, max_positions=1)
     return [
+        ("XAU one-click short scalp", xau_short_scalp_preset()),
         ("XAU slow trend", StrategyConfig(**base, strategy_kind=StrategyKind.TREND, short_window=12, long_window=48, take_profit_pct=1.4, stop_loss_pct=0.7)),
         ("XAU balanced trend", StrategyConfig(**base, strategy_kind=StrategyKind.TREND, short_window=9, long_window=30, take_profit_pct=1.1, stop_loss_pct=0.65)),
         ("XAU range breakout", StrategyConfig(**base, strategy_kind=StrategyKind.BREAKOUT, breakout_window=36, take_profit_pct=1.3, stop_loss_pct=0.65)),
